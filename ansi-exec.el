@@ -44,33 +44,33 @@
      ))
   "Regexps which matches non-SGR control sequences.")
 
-(defun ansi-exec-filter-non-sgr-control-sequences-in-region (begin end)
+(defun ansi-exec/filter-non-sgr-control-sequences-in-region (begin end)
   "Remove non-SRG control sequences in region from BEGIN to END."
   (save-excursion
     (goto-char begin)
     (while
-        (re-search-forward ansi-exec-non-sgr-control-sequence-regexp end t)
+        (re-search-forward ansi-exec/non-sgr-control-sequence-regexp end t)
       (replace-match ""))))
 
 (defun ansi-exec (cmd &optional buffname procname mode)
   "Run shell command CMD as process PROCNAME in buffer BUFFNAME and major-mode MODE."
   (unless buffname (setq buffname (format "* Ansi-Exec %s *" cmd)))
   (unless procname (setq procname (format "Ansi-Exec - %s" cmd)))
-  (unless mode (setq mode #'ansi-exec-mode))
+  (unless mode (setq mode #'ansi-exec/mode))
   (let ((buffer (get-buffer-create buffname)))
     (with-current-buffer buffer (erase-buffer) (funcall mode))
     (make-process :name procname
                   :buffer buffer
                   :command (list "bash" "-c" (format "TERM=xterm %s" cmd))
                   :noquery t
-                  :sentinel #'ansi-exec-sentinel)))
+                  :sentinel #'ansi-exec/sentinel)))
 
-(defun ansi-exec-sentinel (proc _event)
+(defun ansi-exec/sentinel (proc _event)
   "Handle output from PROC."
   (when (memq (process-status proc) '(exit signal))
     (with-current-buffer (process-buffer proc)
       (ansi-color-apply-on-region (point-min) (point-max))
-      (ansi-exec-filter-non-sgr-control-sequences-in-region (point-min) (point-max)))
+      (ansi-exec/filter-non-sgr-control-sequences-in-region (point-min) (point-max)))
     (pop-to-buffer (process-buffer proc))))
 
 (provide 'ansi-exec)
