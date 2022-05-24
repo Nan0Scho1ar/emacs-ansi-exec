@@ -25,14 +25,14 @@
   fundamental-mode "Ansi-Exec"
   "Major mode for ansi-exec.")
 
-(defun ansi-exec-build-control-sequence-regexp (regexps)
+(defun ansi-exec/build-control-sequence-regexp (regexps)
   "Build control sequence regexp from list of REGEXPS."
   (mapconcat (lambda (regexp)
                (concat "\\(?:" regexp "\\)"))
              regexps "\\|"))
 
-(defvar ansi-exec-non-sgr-control-sequence-regexp
-  (ansi-exec-build-control-sequence-regexp
+(defvar ansi-exec/non-sgr-control-sequence-regexp
+  (ansi-exec/build-control-sequence-regexp
    '(;; icon name escape sequences
      "\033\\][0-2];.*?\007"
      ;; non-SGR CSI escape sequences
@@ -56,7 +56,7 @@
   "Run shell command CMD as process PROCNAME in buffer BUFFNAME and major-mode MODE."
   (unless buffname (setq buffname (format "* Ansi-Exec %s *" cmd)))
   (unless procname (setq procname (format "Ansi-Exec - %s" cmd)))
-  (unless mode (setq mode #'ansi-exec/mode))
+  (unless mode (setq mode #'ansi-exec-mode))
   (let ((buffer (get-buffer-create buffname)))
     (with-current-buffer buffer (erase-buffer) (funcall mode))
     (make-process :name procname
